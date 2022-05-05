@@ -29,16 +29,16 @@ public:
 private:
 
 	const int maxChannels{ 2 };
+	const int maxHistory{ 1000 };
 	const int verticesPerLine{ 2 };
-	const int totalHistory{ 100 };
-	const int totalVertices{ totalHistory * maxSampleSize * maxChannels * verticesPerLine };
+	const int totalVertices{ maxHistory * maxSampleSize * maxChannels * verticesPerLine };
 
 	VermeulenLadderFilterAudioProcessor& audioProcessor;
 
+	int history{ 50 };
 	float drive{ 1.0 };
 	float volume{ 0.5 };
 	float resonance{ 0.0 };
-	float timeDelta{ 0.5 };
 	float frequency{ 44100.0 };
 
 	struct AudioData
@@ -71,9 +71,9 @@ private:
 	juce::Slider frequencySlider{ juce::Slider::SliderStyle::RotaryHorizontalDrag,
 		juce::Slider::TextEntryBoxPosition::TextBoxBelow };
 
-	juce::LookAndFeel_V4 lookAndFeelTimeDeltaSlider;
-	juce::Label timeDeltaLabel{ "TimeDeltaLabel", "Time delta" };
-	juce::Slider timeDeltaSlider{ juce::Slider::SliderStyle::RotaryHorizontalDrag,
+	juce::LookAndFeel_V4 lookAndFeelHistorySlider;
+	juce::Label historyLabel{ "HistoryLabel", "History" };
+	juce::Slider historySlider{ juce::Slider::SliderStyle::RotaryHorizontalDrag,
 		juce::Slider::TextEntryBoxPosition::TextBoxBelow };
 
 	juce::LookAndFeel_V4 lookAndFeelVolumeSlider;

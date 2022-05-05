@@ -45,7 +45,7 @@ Renderer::Renderer(VermeulenLadderFilterAudioProcessor& audioProcessor) : audioP
 		juce::Colour::fromFloatRGBA(0.15f, 0.25f, 0.8f, 1.0f),
 		juce::Colour::fromFloatRGBA(0.15f, 0.5f, 0.8f, 1.0f));
 
-	SetupComponent(timeDeltaLabel, timeDeltaSlider, lookAndFeelTimeDeltaSlider, 0.0, 1.0, timeDelta,
+	SetupComponent(historyLabel, historySlider, lookAndFeelHistorySlider, 1, maxHistory, history,
 		juce::Colour::fromFloatRGBA(0.15f, 0.25f, 0.8f, 1.0f),
 		juce::Colour::fromFloatRGBA(0.15f, 0.5f, 0.8f, 1.0f));
 
@@ -70,9 +70,9 @@ Renderer::Renderer(VermeulenLadderFilterAudioProcessor& audioProcessor) : audioP
 		audioProcessor.setCutoffFrequency(static_cast<float>((frequencySlider.getValue())));
 	};
 
-	timeDeltaSlider.onValueChange = [&]
+	historySlider.onValueChange = [&]
 	{
-		timeDelta = static_cast<float>(timeDeltaSlider.getValue());
+		history = static_cast<int>(historySlider.getValue());
 	};
 
 	volumeSlider.onValueChange = [&]
@@ -180,7 +180,7 @@ void Renderer::renderOpenGL()
 
 	timeline.push_front(data);
 
-	while (timeline.size() > totalHistory)
+	while (timeline.size() > history)
 	{
 		timeline.pop_back();
 	}
@@ -253,6 +253,6 @@ void Renderer::resized()
 	SetBounds(driveSlider, driveLabel, bounds.getWidth() * 0.25f, 100);
 	SetBounds(resonanceSlider, resonanceLabel, bounds.getWidth() * 0.375f, 100);
 	SetBounds(frequencySlider, frequencyLabel, bounds.getWidth() * 0.5f, 100);
-	SetBounds(timeDeltaSlider, timeDeltaLabel, bounds.getWidth() * 0.625f, 100);
+	SetBounds(historySlider, historyLabel, bounds.getWidth() * 0.625f, 100);
 	SetBounds(volumeSlider, volumeLabel, bounds.getWidth() * 0.8f, 175);
 }
