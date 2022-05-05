@@ -133,18 +133,34 @@ void Renderer::newOpenGLContextCreated()
 	buffer.fillVbo(Buffer::Vbo::colourBuffer,
 		(GLfloat*) nullptr,
 		totalVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat));
+
+	const float farClip = 1000.0f;
+	const float nearClip = 0.001f;
+	const auto aspectRatio = 1280.0f / 720.0f;
+	const auto tanHalfFov = tan(juce::degreesToRadians(30.0f) / 2.0f);
+
+	//Formula to build a 3D perspective view using data above (taken from GLM math library)
+	//We are using a column-major matrix implementation here
+	projectionMatrix.mat[0] = 1.0f / (aspectRatio * tanHalfFov);
+	projectionMatrix.mat[5] = 1.0f / (tanHalfFov);
+	projectionMatrix.mat[10] = -(farClip + nearClip) / (farClip - nearClip);
+	projectionMatrix.mat[11] = -1.0f;
+	projectionMatrix.mat[14] = -(2.0f * farClip * nearClip) / (farClip - nearClip);
+	projectionMatrix.mat[15] = 0.0f;
 }
 
 void Renderer::renderOpenGL()
 {
 	juce::OpenGLHelpers::clear(juce::Colours::darkgrey);
+	
+	shader->use();
+	shader->projection->setMatrix4(projectionMatrix.mat, 1, juce::gl::GL_FALSE);
 
 	juce::gl::glViewport(0,
 		static_cast<int>(getBounds().getHeight() * 0.17f),
 		getBounds().getWidth(),
 		static_cast<GLsizei>(getBounds().getHeight() * 0.83f));
 
-	shader->use();
 
 	auto vertexBufferOffset = 0;
 	auto colourBufferOffset = 0;
@@ -166,8 +182,8 @@ void Renderer::renderOpenGL()
 		//Data for left channel
 		for (int i = 0; i < numSamples; i++)
 		{
-			GLfloat vertex[] = { startX + i * 0.001f, 0.45f, 0.0f,
-								 startX + i * 0.001f, 0.45f + channelDataLeft[i], 0.0f };
+			GLfloat vertex[] = { startX + i * 0.001f, -0.5f, -2.1f,
+								 startX + i * 0.001f, -0.5f + std::abs(channelDataLeft[i]), -2.1f };
 
 			GLfloat colour[] = { 1.0f,
 				1.0f - resonance - driveNormalized,
@@ -187,7 +203,7 @@ void Renderer::renderOpenGL()
 		}
 
 		//Data for right channel
-		for (int i = 0; i < numSamples; i++)
+		/*for (int i = 0; i < numSamples; i++)
 		{
 			GLfloat vertex[] = { startX + i * 0.001f, -0.45f, 0.0f,
 								 startX + i * 0.001f, -0.45f + channelDataRight[i], 0.0f };
@@ -207,7 +223,7 @@ void Renderer::renderOpenGL()
 
 			vertexBufferOffset += sizeof(vertex);
 			colourBufferOffset += sizeof(colour);
-		}
+		}*/
 
 		time = 0.0f;
 	}
@@ -217,7 +233,7 @@ void Renderer::renderOpenGL()
 
 	buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xyz, Buffer::DataType::floatingPoint);
 	buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
-	buffer.render(Buffer::RenderMode::lines, numSamples * maxChannels * verticesPerLine);
+	buffer.render(Buffer::RenderMode::lines, numSamples * 1 * verticesPerLine);
 }
 
 void Renderer::openGLContextClosing()

@@ -41,4 +41,5 @@ Shader::Shader(juce::OpenGLContext& glContext) : juce::OpenGLShaderProgram(glCon
 
 	vertexIn = std::make_unique<Attribute>(*this, "vertexIn");
 	colourIn = std::make_unique<Attribute>(*this, "colourIn");
+	projection = std::make_unique<Uniform>(*this, "projection");
 }
