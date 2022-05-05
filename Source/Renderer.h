@@ -1,11 +1,14 @@
 #pragma once
 
 #include <atomic>
+#include <deque>
 #include <memory>
 #include "Buffer.h"
 #include "Shader.h"
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+
+const int maxSampleSize{ 2048 };
 
 class Renderer : public juce::Component, public juce::OpenGLRenderer
 {
@@ -27,8 +30,8 @@ private:
 
 	const int maxChannels{ 2 };
 	const int verticesPerLine{ 2 };
-	const int maxSampleSize{ 2048 };
-	const int totalVertices{ maxSampleSize * maxChannels * verticesPerLine };
+	const int totalHistory{ 100 };
+	const int totalVertices{ totalHistory * maxSampleSize * maxChannels * verticesPerLine };
 
 	VermeulenLadderFilterAudioProcessor& audioProcessor;
 
@@ -37,6 +40,13 @@ private:
 	float resonance{ 0.0 };
 	float timeDelta{ 0.5 };
 	float frequency{ 44100.0 };
+
+	struct AudioData
+	{
+		float data[maxSampleSize];
+	};
+
+	std::deque<AudioData> timeline;
 
 	Buffer buffer;
 	juce::OpenGLContext context;

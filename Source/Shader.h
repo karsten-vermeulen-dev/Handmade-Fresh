@@ -14,5 +14,7 @@ public:
 
 	std::unique_ptr<Attribute> vertexIn;
 	std::unique_ptr<Attribute> colourIn;
+	
+	std::unique_ptr<Uniform> index;
 	std::unique_ptr<Uniform> projection;
 };

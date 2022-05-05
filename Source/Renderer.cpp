@@ -41,7 +41,7 @@ Renderer::Renderer(VermeulenLadderFilterAudioProcessor& audioProcessor) : audioP
 		juce::Colour::fromFloatRGBA(0.15f, 0.25f, 0.8f, 1.0f),
 		juce::Colour::fromFloatRGBA(0.15f, 0.5f, 0.8f, 1.0f));
 
-	SetupComponent(frequencyLabel, frequencySlider, lookAndFeelFrequencySlider, 1.0, 48000.0, frequency,
+	SetupComponent(frequencyLabel, frequencySlider, lookAndFeelFrequencySlider, 1.0, 24000.0, frequency,
 		juce::Colour::fromFloatRGBA(0.15f, 0.25f, 0.8f, 1.0f),
 		juce::Colour::fromFloatRGBA(0.15f, 0.5f, 0.8f, 1.0f));
 
@@ -152,7 +152,7 @@ void Renderer::newOpenGLContextCreated()
 void Renderer::renderOpenGL()
 {
 	juce::OpenGLHelpers::clear(juce::Colours::darkgrey);
-	
+
 	shader->use();
 	shader->projection->setMatrix4(projectionMatrix.mat, 1, juce::gl::GL_FALSE);
 
@@ -161,39 +161,50 @@ void Renderer::renderOpenGL()
 		getBounds().getWidth(),
 		static_cast<GLsizei>(getBounds().getHeight() * 0.83f));
 
-
-	auto vertexBufferOffset = 0;
-	auto colourBufferOffset = 0;
-
-	static auto time = 0.0f;
-	time += 0.1f;
-
 	auto numSamples = audioProcessor.getNumSamples();
 	auto driveNormalized = drive / 100.0f;
 
-	if (time >= timeDelta)
+	//We are only using left channel data for now
+	auto channelDataLeft = audioProcessor.getChannelDataLeft();
+	auto channelDataRight = audioProcessor.getChannelDataLeft();
+
+	auto halfSamples = numSamples * 0.5f;
+	auto startX = 0.0f - (halfSamples * 0.001f);
+
+	AudioData data;
+
+	for (int i = 0; i < numSamples; i++)
 	{
-		auto channelDataLeft = audioProcessor.getChannelDataLeft();
-		auto channelDataRight = audioProcessor.getChannelDataLeft();
+		data.data[i] = std::abs(channelDataLeft[i]);
+	}
 
-		auto halfSamples = numSamples * 0.5f;
-		auto startX = 0.0f - (halfSamples * 0.001f);
+	timeline.push_front(data);
 
-		//Data for left channel
+	while (timeline.size() > totalHistory)
+	{
+		timeline.pop_back();
+	}
+
+	auto index = 0;
+
+	//Data for left channel only (for now!)
+	for (auto& frame : timeline)
+	{
+		auto vertexBufferOffset = 0;
+		auto colourBufferOffset = 0;
+
+		shader->index->set(static_cast<float> (index));
+
 		for (int i = 0; i < numSamples; i++)
 		{
-			GLfloat vertex[] = { startX + i * 0.001f, -0.5f, -2.1f,
-								 startX + i * 0.001f, -0.5f + std::abs(channelDataLeft[i]), -2.1f };
+			GLfloat vertex[] = { startX + i * 0.001f,
+								 -0.5f + frame.data[i],
+								 -2.5f - index * 0.25f };
 
 			GLfloat colour[] = { 1.0f,
-				1.0f - resonance - driveNormalized,
-				1.0f - driveNormalized,
-				1.0f - abs(static_cast<float>(i) / halfSamples - 1),
-
-				1.0f,
-				1.0f - resonance - driveNormalized,
-				1.0f - driveNormalized,
-				1.0f - abs(static_cast<float>(i) / halfSamples - 1) };
+								 1.0f - resonance - driveNormalized,
+								 1.0f - driveNormalized,
+								 1.0f - abs(static_cast<float>(i) / halfSamples - 1) };
 
 			buffer.appendVbo(Buffer::Vbo::vertexBuffer, vertex, sizeof(vertex), vertexBufferOffset);
 			buffer.appendVbo(Buffer::Vbo::colourBuffer, colour, sizeof(colour), colourBufferOffset);
@@ -202,38 +213,15 @@ void Renderer::renderOpenGL()
 			colourBufferOffset += sizeof(colour);
 		}
 
-		//Data for right channel
-		/*for (int i = 0; i < numSamples; i++)
-		{
-			GLfloat vertex[] = { startX + i * 0.001f, -0.45f, 0.0f,
-								 startX + i * 0.001f, -0.45f + channelDataRight[i], 0.0f };
+		Buffer::setGLStates();
+		Buffer::setLineWidth(static_cast<GLfloat>(1.0f + (3.0f * driveNormalized)));
 
-			GLfloat colour[] = { 1.0f,
-				1.0f - resonance - driveNormalized,
-				1.0f - driveNormalized,
-				1.0f - abs(static_cast<float>(i) / halfSamples - 1),
+		buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xyz, Buffer::DataType::floatingPoint);
+		buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
+		buffer.render(Buffer::RenderMode::lineStrip, numSamples * verticesPerLine);
 
-				1.0f,
-				1.0f - resonance - driveNormalized,
-				1.0f - driveNormalized,
-				1.0f - abs(static_cast<float>(i) / halfSamples - 1) };
-
-			buffer.appendVbo(Buffer::Vbo::vertexBuffer, vertex, sizeof(vertex), vertexBufferOffset);
-			buffer.appendVbo(Buffer::Vbo::colourBuffer, colour, sizeof(colour), colourBufferOffset);
-
-			vertexBufferOffset += sizeof(vertex);
-			colourBufferOffset += sizeof(colour);
-		}*/
-
-		time = 0.0f;
+		index++;
 	}
-
-	Buffer::setGLStates();
-	Buffer::setLineWidth(static_cast<GLfloat>(1.0f + (3.0f * driveNormalized)));
-
-	buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xyz, Buffer::DataType::floatingPoint);
-	buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
-	buffer.render(Buffer::RenderMode::lines, numSamples * 1 * verticesPerLine);
 }
 
 void Renderer::openGLContextClosing()
