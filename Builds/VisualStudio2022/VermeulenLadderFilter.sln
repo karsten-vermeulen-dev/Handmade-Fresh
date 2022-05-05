@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio Version 17
+
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VermeulenLadderFilter - Standalone Plugin", "VermeulenLadderFilter_StandalonePlugin.vcxproj", "{8EFB9CC3-11FA-57F5-52C6-A984A7A08071}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4} = {1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VermeulenLadderFilter - VST3", "VermeulenLadderFilter_VST3.vcxproj", "{C60A1E1A-0FEE-8539-44F0-2DB08920AF90}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4} = {1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VermeulenLadderFilter - Shared Code", "VermeulenLadderFilter_SharedCode.vcxproj", "{1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C60A1E1A-0FEE-8539-44F0-2DB08920AF90}.Debug|x64.ActiveCfg = Debug|x64
+		{C60A1E1A-0FEE-8539-44F0-2DB08920AF90}.Debug|x64.Build.0 = Debug|x64
+		{C60A1E1A-0FEE-8539-44F0-2DB08920AF90}.Release|x64.ActiveCfg = Release|x64
+		{C60A1E1A-0FEE-8539-44F0-2DB08920AF90}.Release|x64.Build.0 = Release|x64
+		{8EFB9CC3-11FA-57F5-52C6-A984A7A08071}.Debug|x64.ActiveCfg = Debug|x64
+		{8EFB9CC3-11FA-57F5-52C6-A984A7A08071}.Debug|x64.Build.0 = Debug|x64
+		{8EFB9CC3-11FA-57F5-52C6-A984A7A08071}.Release|x64.ActiveCfg = Release|x64
+		{8EFB9CC3-11FA-57F5-52C6-A984A7A08071}.Release|x64.Build.0 = Release|x64
+		{1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4}.Debug|x64.ActiveCfg = Debug|x64
+		{1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4}.Debug|x64.Build.0 = Debug|x64
+		{1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4}.Release|x64.ActiveCfg = Release|x64
+		{1E2A2D6F-B828-54E6-0EAF-FD3D737F93A4}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
