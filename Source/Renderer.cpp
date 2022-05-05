@@ -124,15 +124,15 @@ void Renderer::newOpenGLContextCreated()
 
 	shader = std::make_unique<Shader>(context);
 
-	buffer.create(totalVertices);
+	buffer.create(maxVertices);
 
 	buffer.fillVbo(Buffer::Vbo::vertexBuffer,
 		(GLfloat*) nullptr,
-		totalVertices * static_cast<int> (Buffer::ComponentSize::xyz) * sizeof(GLfloat));
+		maxVertices * static_cast<int> (Buffer::ComponentSize::xyz) * sizeof(GLfloat));
 
 	buffer.fillVbo(Buffer::Vbo::colourBuffer,
 		(GLfloat*) nullptr,
-		totalVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat));
+		maxVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat));
 
 	const float farClip = 1000.0f;
 	const float nearClip = 0.001f;
@@ -175,7 +175,7 @@ void Renderer::renderOpenGL()
 
 	for (int i = 0; i < numSamples; i++)
 	{
-		data.data[i] = std::abs(channelDataLeft[i]);
+		data.data.emplace_back(std::abs(channelDataLeft[i]));
 	}
 
 	timeline.push_front(data);

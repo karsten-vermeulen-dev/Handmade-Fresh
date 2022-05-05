@@ -3,6 +3,7 @@
 #include <atomic>
 #include <deque>
 #include <memory>
+#include <vector>
 #include "Buffer.h"
 #include "Shader.h"
 #include <JuceHeader.h>
@@ -31,7 +32,7 @@ private:
 	const int maxChannels{ 2 };
 	const int maxHistory{ 1000 };
 	const int verticesPerLine{ 2 };
-	const int totalVertices{ maxHistory * maxSampleSize * maxChannels * verticesPerLine };
+	const int maxVertices{ maxHistory * maxSampleSize * maxChannels };
 
 	VermeulenLadderFilterAudioProcessor& audioProcessor;
 
@@ -43,7 +44,8 @@ private:
 
 	struct AudioData
 	{
-		float data[maxSampleSize];
+		//float data[maxSampleSize];
+		std::vector<float> data;
 	};
 
 	std::deque<AudioData> timeline;
