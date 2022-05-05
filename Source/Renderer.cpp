@@ -171,11 +171,11 @@ void Renderer::renderOpenGL()
 	auto halfSamples = numSamples * 0.5f;
 	auto startX = 0.0f - (halfSamples * 0.001f);
 
-	AudioData data;
+	std::vector<float> data;
 
 	for (int i = 0; i < numSamples; i++)
 	{
-		data.data.emplace_back(std::abs(channelDataLeft[i]));
+		data.emplace_back(std::abs(channelDataLeft[i]));
 	}
 
 	timeline.push_front(data);
@@ -198,7 +198,7 @@ void Renderer::renderOpenGL()
 		for (int i = 0; i < numSamples; i++)
 		{
 			GLfloat vertex[] = { startX + i * 0.001f,
-								 -0.5f + frame.data[i],
+								 -0.5f + frame[i],
 								 -2.5f - index * 0.25f };
 
 			GLfloat colour[] = { 1.0f,
@@ -218,7 +218,7 @@ void Renderer::renderOpenGL()
 
 		buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xyz, Buffer::DataType::floatingPoint);
 		buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
-		buffer.render(Buffer::RenderMode::lineStrip, numSamples * verticesPerLine);
+		buffer.render(Buffer::RenderMode::lineStrip, numSamples);
 
 		index++;
 	}

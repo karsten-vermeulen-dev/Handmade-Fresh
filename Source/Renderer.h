@@ -29,10 +29,9 @@ public:
 
 private:
 
-	const int maxChannels{ 2 };
+	const int maxChannels{ 1 };
 	const int maxHistory{ 1000 };
-	const int verticesPerLine{ 2 };
-	const int maxVertices{ maxHistory * maxSampleSize * maxChannels };
+	const int maxVertices{ maxSampleSize * maxChannels };
 
 	VermeulenLadderFilterAudioProcessor& audioProcessor;
 
@@ -42,13 +41,7 @@ private:
 	float resonance{ 0.0 };
 	float frequency{ 44100.0 };
 
-	struct AudioData
-	{
-		//float data[maxSampleSize];
-		std::vector<float> data;
-	};
-
-	std::deque<AudioData> timeline;
+	std::deque<std::vector<float>> timeline;
 
 	Buffer buffer;
 	juce::OpenGLContext context;

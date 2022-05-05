@@ -5,6 +5,7 @@
 class Buffer
 {
 public:
+
 	enum class Fill
 	{
 		once = juce::gl::GL_STATIC_DRAW,
@@ -54,12 +55,16 @@ public:
 	static void setContext(juce::OpenGLContext* context);
 
 	void create(GLuint totalVertices, bool hasEbo = false);
+	
 	void fillVbo(Vbo vbo, GLfloat* data, GLsizeiptr bufferSize, Fill fill = Fill::once);
 	void fillEbo(GLuint* data, GLsizeiptr bufferSize, Fill fill = Fill::once);
+	
 	void appendVbo(Vbo vbo, GLfloat* data, GLsizeiptr size, GLuint offset);
 	void appendEbo(GLuint* data, GLsizeiptr size, GLuint offset);
+	
 	void linkVbo(GLuint attributeID, Vbo vbo, ComponentSize componentSize, DataType dataType);
 	void disableAttribute(GLuint attributeID);
+	
 	void render(RenderMode renderMode, GLuint maxRenderVertices = 0);
 	void destroy();
 
