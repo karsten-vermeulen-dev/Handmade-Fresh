@@ -151,7 +151,7 @@ void Renderer::newOpenGLContextCreated()
 
 void Renderer::renderOpenGL()
 {
-	juce::OpenGLHelpers::clear(juce::Colours::darkgrey);
+	juce::OpenGLHelpers::clear(juce::Colour(23, 24, 23));
 
 	shader->use();
 	shader->projection->setMatrix4(projectionMatrix.mat, 1, juce::gl::GL_FALSE);
@@ -201,8 +201,8 @@ void Renderer::renderOpenGL()
 								 -0.5f + frame[i],
 								 -2.5f - index * 0.25f };
 
-			GLfloat colour[] = { 1.0f,
-								 1.0f - resonance - driveNormalized,
+			GLfloat colour[] = { 0.0f,
+								 0.57f - resonance - driveNormalized,
 								 1.0f - driveNormalized,
 								 1.0f - abs(static_cast<float>(i) / halfSamples - 1) };
 
