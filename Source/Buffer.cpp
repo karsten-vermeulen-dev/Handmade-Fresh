@@ -89,7 +89,7 @@ void Buffer::disableAttribute(GLuint attributeID)
 	glContext->extensions.glDisableVertexAttribArray(attributeID);
 }
 
-void Buffer::render(RenderMode renderMode, GLuint maxRenderVertices)
+void Buffer::render(RenderMode renderMode, GLint index, GLuint maxRenderVertices)
 {
 	auto verticesToRender = (maxRenderVertices > 0) ? maxRenderVertices : totalVertices;
 
@@ -101,7 +101,7 @@ void Buffer::render(RenderMode renderMode, GLuint maxRenderVertices)
 
 	else
 	{
-		juce::gl::glDrawArrays(static_cast<GLenum> (renderMode), 0, static_cast<GLsizei> (verticesToRender));
+		juce::gl::glDrawArrays(static_cast<GLenum> (renderMode), index, static_cast<GLsizei> (verticesToRender));
 	}
 }
 

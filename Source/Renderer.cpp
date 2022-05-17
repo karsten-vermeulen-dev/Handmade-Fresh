@@ -128,11 +128,11 @@ void Renderer::newOpenGLContextCreated()
 
 	buffer.fillVbo(Buffer::Vbo::vertexBuffer,
 		(GLfloat*) nullptr,
-		maxVertices * static_cast<int> (Buffer::ComponentSize::xyz) * sizeof(GLfloat));
+		maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::xy) * sizeof(GLfloat));
 
 	buffer.fillVbo(Buffer::Vbo::colourBuffer,
 		(GLfloat*) nullptr,
-		maxVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat));
+		maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat));
 
 	const float farClip = 1000.0f;
 	const float nearClip = 0.001f;
@@ -147,6 +147,12 @@ void Renderer::newOpenGLContextCreated()
 	projectionMatrix.mat[11] = -1.0f;
 	projectionMatrix.mat[14] = -(2.0f * farClip * nearClip) / (farClip - nearClip);
 	projectionMatrix.mat[15] = 0.0f;
+
+	//Build a model matrix to simulate the opposite of a camera movement
+	//We want to move the 'camera' back and up a little
+	modelMatrix.mat[12] = 0.0f;
+	modelMatrix.mat[13] = -0.15f;
+	modelMatrix.mat[14] = -0.25f;
 }
 
 void Renderer::renderOpenGL()
@@ -154,6 +160,7 @@ void Renderer::renderOpenGL()
 	juce::OpenGLHelpers::clear(juce::Colour(23, 24, 23));
 
 	shader->use();
+	shader->model->setMatrix4(modelMatrix.mat, 1, juce::gl::GL_FALSE);
 	shader->projection->setMatrix4(projectionMatrix.mat, 1, juce::gl::GL_FALSE);
 
 	juce::gl::glViewport(0,
@@ -171,57 +178,108 @@ void Renderer::renderOpenGL()
 	auto halfSamples = numSamples * 0.5f;
 	auto startX = 0.0f - (halfSamples * 0.001f);
 
-	std::vector<float> data;
+	//timeline.push_front(data);
 
-	for (int i = 0; i < numSamples; i++)
-	{
-		data.emplace_back(std::abs(channelDataLeft[i]));
-	}
-
-	timeline.push_front(data);
-
-	while (timeline.size() > history)
+	/*while (timeline.size() > history)
 	{
 		timeline.pop_back();
-	}
+	}*/
+
+
+
+	//std::vector<float> data;
+
+	/*for (int i = 0; i < numSamples; i++)
+	{
+		data.emplace_back(std::abs(channelDataLeft[i]));
+	}*/
+
 
 	auto index = 0;
 
-	//Data for left channel only (for now!)
-	for (auto& frame : timeline)
-	{
-		auto vertexBufferOffset = 0;
-		auto colourBufferOffset = 0;
+	static auto startPos = 0;
 
-		shader->index->set(static_cast<float> (index));
+	//Data for left channel only (for now!)
+	//for (auto& frame : timeline)
+	{
+		//auto vertexBufferOffset = 0;
+		//auto colourBufferOffset = 0;
+
+		//shader->index->set(static_cast<float> (index));
+
+		//FILL===================================================================================
 
 		for (int i = 0; i < numSamples; i++)
 		{
-			GLfloat vertex[] = { startX + i * 0.001f,
-								 -0.5f + frame[i],
-								 -2.5f - index * 0.25f };
+			auto data = std::abs(channelDataLeft[i]);
+
+			GLfloat vertex[] = { startX + i * 0.001f,   //x
+								 -0.5f + data };        //y
 
 			GLfloat colour[] = { 0.0f,
 								 0.57f - resonance - driveNormalized,
 								 1.0f - driveNormalized,
 								 1.0f - abs(static_cast<float>(i) / halfSamples - 1) };
 
-			buffer.appendVbo(Buffer::Vbo::vertexBuffer, vertex, sizeof(vertex), vertexBufferOffset);
-			buffer.appendVbo(Buffer::Vbo::colourBuffer, colour, sizeof(colour), colourBufferOffset);
+			/*GLfloat vertex[] = { startX + i * 0.001f,
+								 -0.5f + frame[i],
+								 -2.5f - index * 0.25f };*/
 
-			vertexBufferOffset += sizeof(vertex);
-			colourBufferOffset += sizeof(colour);
+			/*GLfloat colour[] = { 0.0f,
+								0.57f - resonance - driveNormalized,
+								1.0f - driveNormalized,
+								1.0f - abs(static_cast<float>(i) / halfSamples - 1) };*/
+
+			buffer.appendVbo(Buffer::Vbo::vertexBuffer, vertex, sizeof(vertex), startPos * sizeof(vertex));
+			buffer.appendVbo(Buffer::Vbo::colourBuffer, colour, sizeof(colour), startPos * sizeof(colour));
+
+			//vertexBufferOffset += sizeof(vertex);
+			//colourBufferOffset += sizeof(colour);
 		}
 
-		Buffer::setGLStates();
-		Buffer::setLineWidth(static_cast<GLfloat>(1.0f + (3.0f * driveNormalized)));
+		//RENDER=================================================================================
 
-		buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xyz, Buffer::DataType::floatingPoint);
+		auto zPos = 0.0f;
+		auto renderStart = startPos;
+		
+		Buffer::setGLStates();
+		Buffer::setLineWidth(2.0f);
+		//Buffer::setLineWidth(static_cast<GLfloat>(1.0f + (3.0f * driveNormalized)));
+
+		for (int i = 0; i < history; i++)
+		{
+			shader->zPos->set(zPos);
+
+			buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xy, Buffer::DataType::floatingPoint);
+			buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
+			buffer.render(Buffer::RenderMode::lineStrip, renderStart * numSamples, numSamples);
+
+			//glDrawArrays(GL_LINES, renderStart * maxVertices, maxVertices);
+
+			zPos -= 0.5f;
+			renderStart -= 1;
+
+			if (renderStart < 0)
+			{
+				renderStart = history - 1;
+			}
+		}
+
+
+		/*buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xyz, Buffer::DataType::floatingPoint);
 		buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
-		buffer.render(Buffer::RenderMode::lineStrip, numSamples);
+		buffer.render(Buffer::RenderMode::lineStrip, numSamples);*/
 
 		index++;
 	}
+
+	startPos++;
+
+	if (startPos == history)
+	{
+		startPos = 0;
+	}
+
 }
 
 void Renderer::openGLContextClosing()

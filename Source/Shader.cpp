@@ -42,6 +42,7 @@ Shader::Shader(juce::OpenGLContext& glContext) : juce::OpenGLShaderProgram(glCon
 	vertexIn = std::make_unique<Attribute>(*this, "vertexIn");
 	colourIn = std::make_unique<Attribute>(*this, "colourIn");
 	
-	index = std::make_unique<Uniform>(*this, "index");
+	zPos = std::make_unique<Uniform>(*this, "zPos");
+	model = std::make_unique<Uniform>(*this, "model");
 	projection = std::make_unique<Uniform>(*this, "projection");
 }

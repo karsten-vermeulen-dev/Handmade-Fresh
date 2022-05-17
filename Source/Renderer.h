@@ -46,6 +46,8 @@ private:
 	Buffer buffer;
 	juce::OpenGLContext context;
 	std::unique_ptr<Shader> shader;
+	
+	juce::Matrix3D<GLfloat> modelMatrix;
 	juce::Matrix3D<GLfloat> projectionMatrix;
 
 	juce::LookAndFeel_V4 lookAndFeelModeBox;

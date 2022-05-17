@@ -65,7 +65,7 @@ public:
 	void linkVbo(GLuint attributeID, Vbo vbo, ComponentSize componentSize, DataType dataType);
 	void disableAttribute(GLuint attributeID);
 	
-	void render(RenderMode renderMode, GLuint maxRenderVertices = 0);
+	void render(RenderMode renderMode, GLint index = 0, GLuint maxRenderVertices = 0);
 	void destroy();
 
 private:
