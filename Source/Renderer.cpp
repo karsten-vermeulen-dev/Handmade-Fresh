@@ -175,111 +175,67 @@ void Renderer::renderOpenGL()
 	auto channelDataLeft = audioProcessor.getChannelDataLeft();
 	auto channelDataRight = audioProcessor.getChannelDataLeft();
 
+	auto index = 0;
+	static auto startPos = 0;
+
+	//FILL===================================================================================
+
+	std::vector<float> vertices;
+	std::vector<float> colors;
+
 	auto halfSamples = numSamples * 0.5f;
 	auto startX = 0.0f - (halfSamples * 0.001f);
 
-	//timeline.push_front(data);
-
-	/*while (timeline.size() > history)
+	for (int i = 0; i < numSamples; i++)
 	{
-		timeline.pop_back();
-	}*/
+		auto data = std::abs(channelDataLeft[i]);
 
+		vertices.push_back(startX + i * 0.001f);   //x
+		vertices.push_back(-0.5f + data);          //y
 
+		colors.push_back(0.0f);                                                 //r
+		colors.push_back(0.57f - resonance - driveNormalized);                  //g
+		colors.push_back(1.0f - driveNormalized);                               //b
+		colors.push_back(1.0f - abs(static_cast<float>(i) / halfSamples - 1));  //a
+	}
 
-	//std::vector<float> data;
+	auto dataSizeVertex = vertices.size() * sizeof(GLfloat);
+	auto dataSizeColor = colors.size() * sizeof(GLfloat);
 
-	/*for (int i = 0; i < numSamples; i++)
+	buffer.appendVbo(Buffer::Vbo::vertexBuffer, vertices.data(), dataSizeVertex, startPos * dataSizeVertex);
+	buffer.appendVbo(Buffer::Vbo::colourBuffer, colors.data(), dataSizeColor, startPos * dataSizeColor);
+
+	//RENDER=================================================================================
+
+	auto zPos = 0.0f;
+	auto renderStart = startPos;
+
+	Buffer::setGLStates();
+	Buffer::setLineWidth(static_cast<GLfloat>(1.0f + (3.0f * driveNormalized)));
+
+	for (int i = 0; i < history; i++)
 	{
-		data.emplace_back(std::abs(channelDataLeft[i]));
-	}*/
+		shader->zPos->set(zPos);
 
-
-	auto index = 0;
-
-	static auto startPos = 0;
-
-	//Data for left channel only (for now!)
-	//for (auto& frame : timeline)
-	{
-		//auto vertexBufferOffset = 0;
-		//auto colourBufferOffset = 0;
-
-		//shader->index->set(static_cast<float> (index));
-
-		//FILL===================================================================================
-
-		for (int i = 0; i < numSamples; i++)
-		{
-			auto data = std::abs(channelDataLeft[i]);
-
-			GLfloat vertex[] = { startX + i * 0.001f,   //x
-								 -0.5f + data };        //y
-
-			GLfloat colour[] = { 0.0f,
-								 0.57f - resonance - driveNormalized,
-								 1.0f - driveNormalized,
-								 1.0f - abs(static_cast<float>(i) / halfSamples - 1) };
-
-			/*GLfloat vertex[] = { startX + i * 0.001f,
-								 -0.5f + frame[i],
-								 -2.5f - index * 0.25f };*/
-
-			/*GLfloat colour[] = { 0.0f,
-								0.57f - resonance - driveNormalized,
-								1.0f - driveNormalized,
-								1.0f - abs(static_cast<float>(i) / halfSamples - 1) };*/
-
-			buffer.appendVbo(Buffer::Vbo::vertexBuffer, vertex, sizeof(vertex), startPos * sizeof(vertex));
-			buffer.appendVbo(Buffer::Vbo::colourBuffer, colour, sizeof(colour), startPos * sizeof(colour));
-
-			//vertexBufferOffset += sizeof(vertex);
-			//colourBufferOffset += sizeof(colour);
-		}
-
-		//RENDER=================================================================================
-
-		auto zPos = 0.0f;
-		auto renderStart = startPos;
-		
-		Buffer::setGLStates();
-		Buffer::setLineWidth(2.0f);
-		//Buffer::setLineWidth(static_cast<GLfloat>(1.0f + (3.0f * driveNormalized)));
-
-		for (int i = 0; i < history; i++)
-		{
-			shader->zPos->set(zPos);
-
-			buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xy, Buffer::DataType::floatingPoint);
-			buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
-			buffer.render(Buffer::RenderMode::lineStrip, renderStart * numSamples, numSamples);
-
-			//glDrawArrays(GL_LINES, renderStart * maxVertices, maxVertices);
-
-			zPos -= 0.5f;
-			renderStart -= 1;
-
-			if (renderStart < 0)
-			{
-				renderStart = history - 1;
-			}
-		}
-
-
-		/*buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xyz, Buffer::DataType::floatingPoint);
+		buffer.linkVbo(shader->vertexIn->attributeID, Buffer::vertexBuffer, Buffer::ComponentSize::xy, Buffer::DataType::floatingPoint);
 		buffer.linkVbo(shader->colourIn->attributeID, Buffer::colourBuffer, Buffer::ComponentSize::rgba, Buffer::DataType::floatingPoint);
-		buffer.render(Buffer::RenderMode::lineStrip, numSamples);*/
+		buffer.render(Buffer::RenderMode::lineStrip, renderStart * numSamples, numSamples);
 
-		index++;
+		zPos -= 0.5f;
+		renderStart -= 1;
+
+		if (renderStart < 0)
+		{
+			renderStart = history - 1;
+		}
 	}
 
 	startPos++;
 
-	if (startPos == history)
+	if (startPos >= history)
 	{
 		startPos = 0;
 	}
-
 }
 
 void Renderer::openGLContextClosing()
