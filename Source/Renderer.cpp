@@ -143,14 +143,14 @@ void Renderer::newOpenGLContextCreated()
 
 	buffer.fillVbo(Buffer::Vbo::vertexBuffer,
 		(GLfloat*) nullptr,
-		maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::xy) * sizeof(GLfloat));
+		maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::xy) * sizeof(GLfloat), Buffer::Fill::ongoing);
 
 	buffer.fillVbo(Buffer::Vbo::colourBuffer,
 		(GLfloat*) nullptr,
-		maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat));
+		maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat), Buffer::Fill::ongoing);
 
 	const float farClip = 1000.0f;
-	const float nearClip = 0.001f;
+	const float nearClip = 0.1f;
 	const auto aspectRatio = 1280.0f / 720.0f;
 	const auto tanHalfFov = tan(juce::degreesToRadians(30.0f) / 2.0f);
 
@@ -196,12 +196,7 @@ void Renderer::renderOpenGL()
 	auto channelDataLeft = audioProcessor.getChannelDataLeft();
 	auto channelDataRight = audioProcessor.getChannelDataLeft();
 
-	static auto startPos = 0;
-
-	if (startPos >= history)
-	{
-		startPos = 0;
-	}
+	
 
 	//FILL===================================================================================
 
@@ -227,6 +222,39 @@ void Renderer::renderOpenGL()
 
 	auto dataSizeVertex = vertices.size() * sizeof(GLfloat);
 	auto dataSizeColor = colors.size() * sizeof(GLfloat);
+
+	static auto startPos = 0;
+	static auto oldHistory = history;
+
+	if (oldHistory < history)
+	{
+		oldHistory = history;
+	}
+
+	else if (oldHistory > history)
+	{
+		/*auto d = (oldHistory - history);
+		auto v = d * maxVertices * static_cast<int> (Buffer::ComponentSize::xy) * sizeof(GLfloat);
+		auto c = d * maxVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat);
+
+		buffer.appendVbo(Buffer::Vbo::vertexBuffer, (GLfloat*)nullptr, v, history * dataSizeVertex);
+		buffer.appendVbo(Buffer::Vbo::colourBuffer, (GLfloat*)nullptr, c, history * dataSizeColor);*/
+
+		buffer.fillVbo(Buffer::Vbo::vertexBuffer,
+			(GLfloat*) nullptr,
+			maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::xy) * sizeof(GLfloat), Buffer::Fill::ongoing);
+
+		buffer.fillVbo(Buffer::Vbo::colourBuffer,
+			(GLfloat*) nullptr,
+			maxHistory * maxVertices * static_cast<int> (Buffer::ComponentSize::rgba) * sizeof(GLfloat), Buffer::Fill::ongoing);
+
+		oldHistory = history;
+	}
+
+	if (startPos >= history)
+	{
+		startPos = 0;
+	}
 
 	buffer.appendVbo(Buffer::Vbo::vertexBuffer, vertices.data(), dataSizeVertex, startPos * dataSizeVertex);
 	buffer.appendVbo(Buffer::Vbo::colourBuffer, colors.data(), dataSizeColor, startPos * dataSizeColor);

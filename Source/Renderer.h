@@ -35,7 +35,7 @@ public:
 private:
 
 	const int maxChannels{ 1 };
-	const int maxHistory{ 1000 };
+	const int maxHistory{ 100000 };
 	const int maxVertices{ maxSampleSize * maxChannels };
 
 	VermeulenLadderFilterAudioProcessor& audioProcessor;
