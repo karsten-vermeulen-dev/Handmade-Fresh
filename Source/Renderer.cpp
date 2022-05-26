@@ -178,6 +178,11 @@ void Renderer::renderOpenGL()
 	auto index = 0;
 	static auto startPos = 0;
 
+	if (startPos >= history)
+	{
+		startPos = 0;
+	}
+
 	//FILL===================================================================================
 
 	std::vector<float> vertices;
@@ -186,6 +191,7 @@ void Renderer::renderOpenGL()
 	auto halfSamples = numSamples * 0.5f;
 	auto startX = 0.0f - (halfSamples * 0.001f);
 
+	//One 'time slice' of data
 	for (int i = 0; i < numSamples; i++)
 	{
 		auto data = std::abs(channelDataLeft[i]);
@@ -232,10 +238,7 @@ void Renderer::renderOpenGL()
 
 	startPos++;
 
-	if (startPos >= history)
-	{
-		startPos = 0;
-	}
+
 }
 
 void Renderer::openGLContextClosing()
