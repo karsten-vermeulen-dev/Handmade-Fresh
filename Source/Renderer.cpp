@@ -196,7 +196,6 @@ void Renderer::renderOpenGL()
 	auto channelDataLeft = audioProcessor.getChannelDataLeft();
 	auto channelDataRight = audioProcessor.getChannelDataLeft();
 
-	auto index = 0;
 	static auto startPos = 0;
 
 	if (startPos >= history)
@@ -258,8 +257,6 @@ void Renderer::renderOpenGL()
 	}
 
 	startPos++;
-
-
 }
 
 void Renderer::openGLContextClosing()
