@@ -39,7 +39,9 @@ private:
 	float drive{ 1.0 };
 	float volume{ 0.5 };
 	float resonance{ 0.0 };
+	float cameraSpeed{ 2.0f };
 	float frequency{ 44100.0 };
+	float mouseDragSpeed{ 0.5f };
 
 	std::deque<std::vector<float>> timeline;
 
@@ -47,6 +49,8 @@ private:
 	juce::OpenGLContext context;
 	std::unique_ptr<Shader> shader;
 	
+	juce::Vector3D<GLfloat> cameraPosition {0.0f, 0.0f, 0.0f};
+
 	juce::Matrix3D<GLfloat> modelMatrix;
 	juce::Matrix3D<GLfloat> projectionMatrix;
 

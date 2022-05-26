@@ -150,13 +150,19 @@ void Renderer::newOpenGLContextCreated()
 
 	//Build a model matrix to simulate the opposite of a camera movement
 	//We want to move the 'camera' back and up a little
-	modelMatrix.mat[12] = 0.0f;
-	modelMatrix.mat[13] = -0.15f;
-	modelMatrix.mat[14] = -0.25f;
+	cameraPosition.x = 0.0f;
+	cameraPosition.y = 0.15f;
+	cameraPosition.z = 0.25f;
 }
 
 void Renderer::renderOpenGL()
 {
+	//Build a model matrix to simulate the opposite of a camera movement
+	//We want to move the 'camera' back and up a little
+	modelMatrix.mat[12] = -cameraPosition.x;
+	modelMatrix.mat[13] = -cameraPosition.y;
+	modelMatrix.mat[14] = -cameraPosition.z;
+
 	juce::OpenGLHelpers::clear(juce::Colour(23, 24, 23));
 
 	shader->use();
