@@ -22,6 +22,11 @@ public:
 	Renderer(VermeulenLadderFilterAudioProcessor& audioProcessor);
 	~Renderer();
 
+	void mouseWheelMove(const juce::MouseEvent& event,
+		const juce::MouseWheelDetails& wheel) override;
+
+	void mouseDrag(const juce::MouseEvent& event) override;
+
 	void newOpenGLContextCreated() override;
 	void renderOpenGL() override;
 	void openGLContextClosing() override;

@@ -116,6 +116,21 @@ Renderer::Renderer(VermeulenLadderFilterAudioProcessor& audioProcessor) : audioP
 
 Renderer::~Renderer()
 {
+
+}
+
+void Renderer::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
+{
+	cameraPosition.z -= wheel.deltaY * cameraSpeed;
+}
+
+void Renderer::mouseDrag(const juce::MouseEvent& event)
+{
+	auto deltaX = (event.x - event.mouseDownPosition.x) / 1280.0f;
+	auto deltaY = (event.y - event.mouseDownPosition.y) / 720.0f;
+	
+	cameraPosition.x -= deltaX * mouseDragSpeed;
+	cameraPosition.y += deltaY * mouseDragSpeed;
 }
 
 void Renderer::newOpenGLContextCreated()
