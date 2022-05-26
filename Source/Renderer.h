@@ -48,13 +48,11 @@ private:
 	float frequency{ 44100.0 };
 	float mouseDragSpeed{ 0.5f };
 
-	std::deque<std::vector<float>> timeline;
-
 	Buffer buffer;
 	juce::OpenGLContext context;
 	std::unique_ptr<Shader> shader;
-	
-	juce::Vector3D<GLfloat> cameraPosition {0.0f, 0.0f, 0.0f};
+
+	juce::Vector3D<GLfloat> cameraPosition{ 0.0f, 0.0f, 0.0f };
 
 	juce::Matrix3D<GLfloat> modelMatrix;
 	juce::Matrix3D<GLfloat> projectionMatrix;

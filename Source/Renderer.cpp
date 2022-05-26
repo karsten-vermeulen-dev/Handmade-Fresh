@@ -128,7 +128,7 @@ void Renderer::mouseDrag(const juce::MouseEvent& event)
 {
 	auto deltaX = (event.x - event.mouseDownPosition.x) / 1280.0f;
 	auto deltaY = (event.y - event.mouseDownPosition.y) / 720.0f;
-	
+
 	cameraPosition.x -= deltaX * mouseDragSpeed;
 	cameraPosition.y += deltaY * mouseDragSpeed;
 }
@@ -195,8 +195,6 @@ void Renderer::renderOpenGL()
 	//We are only using left channel data for now
 	auto channelDataLeft = audioProcessor.getChannelDataLeft();
 	auto channelDataRight = audioProcessor.getChannelDataLeft();
-
-	
 
 	//FILL===================================================================================
 
